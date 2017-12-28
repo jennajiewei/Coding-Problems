@@ -1,0 +1,29 @@
+import heapq
+from heapq import heappush, heappop
+class Data:
+    def __init__(self,value,count):
+        self.value = value
+        self.count = count
+
+    def __lt__(self, other):
+        return self.count <= other.count
+class Solution(object):
+    
+    def topKFrequent(self, nums, k):
+        """
+        :type nums: List[int]
+        :type k: int
+        :rtype: List[int]
+        """
+        heap = []
+        dictionary = {}
+        for num in nums:
+            if num not in dictionary:
+                dictionary[num] = 0
+            dictionary[num] += 1
+        for key in dictionary:
+            data = Data(key,dictionary[key])
+            heapq.heappush(heap,data)
+            if len(heap) > k:
+                heapq.heappop(heap)        
+        return sorted([data.value for data in heap])
