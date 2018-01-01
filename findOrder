@@ -1,0 +1,113 @@
+import queue
+# find the pattern that used to sort list of words                                    
+# get orders that can be figured out by observing the order of words
+def getOrders(words):
+	results = []
+	dfsHelper(words, 0, 0, len(words) - 1, results)
+	return results
+
+def dfsHelper(words, index, start, end, links):
+	if (words is None or len(words) == 0):
+		return
+	if start >= end:
+		return
+	while (start < end and index > len(words[start]) - 1):
+		start += 1
+	if start >= end:
+		return
+	
+	order = ""
+	c = words[start][index]
+	order += c
+	i = start
+
+	while i <= end:
+		while (i <= end and words[i][index] == c):
+			i += 1
+		dfsHelper(words, index + 1, start, i - 1, links)
+		if i <= end:
+			start = i
+			c = words[start][index]
+			order += c
+
+	if len(order) > 1:
+		links.append(order)
+
+# split letter orders to [from -> to] link pairs
+def getLinks(orders):
+	links = set()
+	for order in orders:
+		for i in range(0, len(order) - 1):
+			links.add("" + order[i] + order[i + 1])
+	return links
+
+# use topology sort to find out a possible letter order
+def topologySort(links):
+	result = ""
+	neighbors = {}
+	indegrees = {}
+	chars = set()
+
+	for link in links:
+		chars.add(link[0])
+		chars.add(link[1])
+
+	for c in chars:
+		indegrees[c] = 0
+		neighbors[c] = set()
+
+	for link in links:
+		fr = link[0]
+		to = link[1]
+		indegrees[to] += 1
+		neighbors[fr].add(to)
+
+	q = queue.Queue()
+	for c in chars:
+		if indegrees[c] == 0:
+			q.put(c)
+
+	while not q.empty():
+		node = q.get()
+		result += node
+		for neighbor in neighbors[node]:
+			indegrees[neighbor] -= 1
+			if indegrees[neighbor] == 0:
+				q.put(neighbor)
+
+	return result
+
+# start of the program
+def run():
+	words = []
+	fileName = input("Please input the full file name(with .txt): ")
+	try:
+		file = open(fileName)
+	except IOError:
+		print("Cannot find the file: " + fileName + ". Please try again.")
+		return
+	else:
+		for line in file:
+			words.append(line)
+
+	orders = getOrders(words)
+	links = getLinks(orders)
+	result = topologySort(links)
+	print("One possible order is:")
+	print(result)
+
+run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
